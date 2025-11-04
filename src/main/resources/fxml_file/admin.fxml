@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.trash.controllers.AdminController"
+            style="-fx-background-color: #FFFFFF; -fx-font-family: 'Comic Sans MS';">
+
+    <top>
+        <HBox spacing="10" padding="10" style="-fx-background-color: #76E383;">
+            <ImageView fitWidth="40" fitHeight="40" preserveRatio="true">
+                <image>
+                    <Image url="@../import/photo/Логотип.png"/>
+                </image>
+            </ImageView>
+            <Label text="Добро пожаловать, администратор!"
+                   style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+            <Button text="Обновить" onAction="#handleRefresh" style="-fx-background-color: #498C51; -fx-text-fill: white;"/>
+            <Button text="Пользователи" onAction="#handleManageUsers" style="-fx-background-color: #498C51; -fx-text-fill: white;"/>
+            <Button text="Выход" onAction="#handleLogout" style="-fx-background-color: #498C51; -fx-text-fill: white;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <TableView fx:id="onlineUsersTable" style="-fx-background-color: white;">
+            <columns>
+                <TableColumn fx:id="colId" text="ID" prefWidth="60"/>
+                <TableColumn fx:id="colUser" text="Имя пользователя" prefWidth="200"/>
+                <TableColumn fx:id="colTime" text="Последняя активность" prefWidth="200"/>
+            </columns>
+        </TableView>
+    </center>
+</BorderPane>

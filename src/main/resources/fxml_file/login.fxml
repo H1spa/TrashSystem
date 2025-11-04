@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<?import javafx.scene.image.Image?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.trash.controllers.LoginController"
+            prefWidth="300" prefHeight="260"
+            style="-fx-background-color: #FFFFFF; -fx-font-family: 'Comic Sans MS';">
+
+    <children>
+
+        <ImageView layoutX="10" layoutY="10" fitWidth="40" fitHeight="40" pickOnBounds="true" preserveRatio="true">
+            <image>
+                <Image url="@../import/photo/Логотип.png"/>
+            </image>
+        </ImageView>
+
+
+
+        <Label text="Логин:" layoutX="40" layoutY="70"/>
+        <TextField fx:id="loginField" layoutX="100" layoutY="65"/>
+
+        <Label text="Пароль:" layoutX="40" layoutY="110"/>
+        <PasswordField fx:id="passwordField" layoutX="100" layoutY="105"/>
+
+        <Label text="Роль:" layoutX="40" layoutY="150"/>
+        <ComboBox fx:id="roleBox" layoutX="100" layoutY="145" prefWidth="150"/>
+
+        <Button text="Войти" layoutX="110" layoutY="190"
+                onAction="#handleLogin"
+                style="-fx-background-color: #498C51; -fx-text-fill: white; -fx-font-weight: bold;"/>
+
+        <Label fx:id="messageLabel" layoutX="60" layoutY="225" textFill="red"/>
+        <Label fx:id="blockLabel" layoutX="60" layoutY="240" textFill="blue"/>
+    </children>
+</AnchorPane>
