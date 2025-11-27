@@ -28,8 +28,9 @@ public class UserDAO {
 
     public static ObservableList<User> getOnlineUsers() {
         ObservableList<User> users = FXCollections.observableArrayList();
-        String query = "SELECT user_id, name, last_activity FROM users WHERE last_activity >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)";
 
+        String query = "SELECT id, fio, last_login FROM users " +
+                "WHERE last_login >= DATE_SUB(NOW(), INTERVAL 5 MINUTE) AND archived = 0";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
@@ -37,9 +38,11 @@ public class UserDAO {
 
             while (rs.next()) {
                 users.add(new User(
-                        rs.getInt("user_id"),
-                        rs.getString("name"),
-                        rs.getTimestamp("last_activity").toLocalDateTime()
+                        rs.getInt("id"),
+                        rs.getString("fio"),
+                        rs.getTimestamp("last_login") != null
+                                ? rs.getTimestamp("last_login").toLocalDateTime()
+                                : null
                 ));
             }
 
@@ -50,8 +53,11 @@ public class UserDAO {
     }
 
 
+
     public User findByLoginAndPassword(String login, String password) {
-        String sql = "SELECT * FROM users WHERE login = ? AND password = ?";
+        String sql = "SELECT id, fio, login, password, type_user_id FROM users " +
+                "WHERE login = ? AND password = ? AND archived = 0";
+
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -59,13 +65,14 @@ public class UserDAO {
             stmt.setString(2, password);
 
             ResultSet rs = stmt.executeQuery();
+
             if (rs.next()) {
                 return new User(
-                        rs.getInt("user_id"), // или "id", если у вас так называется
-                        rs.getString("name"),
+                        rs.getInt("id"),
+                        rs.getString("fio"),           // вместо name
                         rs.getString("login"),
                         rs.getString("password"),
-                        rs.getString("type") // ИЗМЕНИЛ: position -> type
+                        String.valueOf(rs.getInt("type_user_id") )     // вместо type
                 );
             }
         } catch (SQLException e) {
@@ -73,4 +80,5 @@ public class UserDAO {
         }
         return null;
     }
+
 }

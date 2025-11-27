@@ -4,12 +4,16 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
+<?import javafx.geometry.Insets?>
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.example.trash.controllers.AdminController"
             style="-fx-background-color: #FFFFFF; -fx-font-family: 'Comic Sans MS';">
 
     <top>
-        <HBox spacing="10" padding="10" style="-fx-background-color: #76E383;">
+        <HBox spacing="10" style="-fx-background-color: #76E383;">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
             <ImageView fitWidth="40" fitHeight="40" preserveRatio="true">
                 <image>
                     <Image url="@../import/photo/Логотип.png"/>
@@ -21,6 +25,7 @@
             <Button text="Пользователи" onAction="#handleManageUsers" style="-fx-background-color: #498C51; -fx-text-fill: white;"/>
             <Button text="Выход" onAction="#handleLogout" style="-fx-background-color: #498C51; -fx-text-fill: white;"/>
         </HBox>
+
     </top>
 
     <center>
