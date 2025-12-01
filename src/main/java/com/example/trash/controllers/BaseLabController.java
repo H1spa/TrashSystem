@@ -59,8 +59,8 @@ public abstract class BaseLabController {
             alert.setContentText("Необходимо выполнить кварцевание помещения.");
             alert.showAndWait();
 
-            // Старт блокировки на 1 минуту после завершения сеанса
-            LoginController.startBlock(timerLabel);
+            // ИСПРАВЛЕНО: передаем количество секунд (60), а не Label
+            LoginController.startGlobalBlock(60);
         });
     }
 

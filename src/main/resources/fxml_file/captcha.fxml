@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.trash.controllers.CaptchaController"
+            prefWidth="600" prefHeight="450"
+            style="-fx-background-color: white;">
+
+    <!-- фон -->
+    <ImageView fitWidth="560" fitHeight="300"
+               layoutX="20" layoutY="20">
+        <image>
+            <Image url="@../import/antidot/фон для капчи.jpg"/>
+        </image>
+    </ImageView>
+
+    <!-- статичная фигура -->
+    <ImageView fx:id="staticPiece"
+               fitWidth="150" fitHeight="150"
+               layoutY="80">
+        <image>
+            <Image url="@../import/antidot/инь.png"/>
+        </image>
+    </ImageView>
+
+    <!-- движущаяся фигура -->
+    <ImageView fx:id="sliderPiece"
+               fitWidth="150" fitHeight="150"
+               layoutY="80">
+        <image>
+            <Image url="@../import/antidot/янь.png"/>
+        </image>
+    </ImageView>
+
+    <!-- слайдер -->
+    <Slider fx:id="captchaSlider"
+            layoutX="40" layoutY="380"
+            prefWidth="520"
+            min="0" max="100"/>
+
+    <!-- статус -->
+    <Label fx:id="statusLabel"
+           layoutX="40" layoutY="340"
+           prefWidth="520"
+           style="-fx-font-size: 14px; -fx-text-fill: #333;"/>
+
+    <!-- кнопка -->
+    <Button fx:id="confirmButton"
+            text="Подтвердить"
+            layoutX="260" layoutY="410"
+            prefWidth="80" prefHeight="30"
+            style="-fx-background-color: #498C51; -fx-text-fill: white; -fx-font-weight: bold;"
+            onAction="#handleConfirm"/>
+</AnchorPane>

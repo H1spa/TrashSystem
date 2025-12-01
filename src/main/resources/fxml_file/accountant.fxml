@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.trash.controllers.AccountantController"
+      alignment="CENTER" spacing="20"
+      style="-fx-padding: 20; -fx-background-color: #FFFFFF; -fx-font-family: 'Comic Sans MS';">
+
+    <!-- Верхняя зелёная панель -->
+    <HBox spacing="10" alignment="CENTER"
+          style="-fx-background-color: #76E383; -fx-padding: 10;">
+        <ImageView fitWidth="40" fitHeight="40" preserveRatio="true">
+            <image>
+                <Image url="@../import/photo/Логотип.png"/>
+            </image>
+        </ImageView>
+        <Label text="Рабочее окно бухгалтера"
+               style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+    </HBox>
+
+    <!-- Основные кнопки бухгалтера -->
+    <VBox spacing="15" alignment="CENTER">
+
+        <Button text="Просмотреть отчёты"
+                onAction="#handleViewReports"
+                style="-fx-background-color: #498C51; -fx-text-fill: white; -fx-pref-width: 240;"/>
+
+        <Button text="Сформировать счёт предприятию (ЮЛ)"
+                onAction="#handleCreateInvoice"
+                style="-fx-background-color: #498C51; -fx-text-fill: white; -fx-pref-width: 240;"/>
+
+        <Button fx:id="logoutButton"
+                text="Выход"
+                onAction="#handleLogout"
+                style="-fx-background-color: #498C51; -fx-text-fill: white; -fx-pref-width: 240;"/>
+    </VBox>
+
+</VBox>
