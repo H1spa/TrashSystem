@@ -6,40 +6,42 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
-import javafx.stage.Stage;
 import javafx.util.Duration;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 
-public abstract class BaseLabController {
+public abstract class BaseLabController extends BaseController {
 
     @FXML
     protected Label timerLabel;
 
-    protected int totalSeconds = 120;
-    protected Timeline timeline;
+    protected int totalSeconds = 3600;
+    protected Timeline quartzTimer;
 
     @FXML
+    @Override
     public void initialize() {
-        startTimer();
+        super.initialize();
+        startQuartzTimer();
     }
 
-    private void startTimer() {
-        timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> tick()));
-        timeline.setCycleCount(Timeline.INDEFINITE);
-        timeline.play();
+    private void startQuartzTimer() {
+        // Добавьте небольшую задержку перед запуском таймера
+        Platform.runLater(() -> {
+            quartzTimer = new Timeline(new KeyFrame(Duration.seconds(1), e -> tick()));
+            quartzTimer.setCycleCount(Timeline.INDEFINITE);
+            quartzTimer.play();
+        });
     }
 
     private void tick() {
         totalSeconds--;
 
         if (totalSeconds <= 0) {
-            timeline.stop();
+            quartzTimer.stop();
             timerLabel.setText("00:00");
             timerLabel.setStyle("-fx-text-fill: red;");
 
             showSessionExpired();
-            logoutForced();
+            logoutToLoginScreen();
             return;
         }
 
@@ -55,30 +57,20 @@ public abstract class BaseLabController {
     private void showSessionExpired() {
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setHeaderText("Сеанс завершён");
+            alert.setTitle("Сеанс завершён");
+            alert.setHeaderText("Время сеанса истекло");
             alert.setContentText("Необходимо выполнить кварцевание помещения.");
             alert.showAndWait();
 
-            // ИСПРАВЛЕНО: передаем количество секунд (60), а не Label
             LoginController.startGlobalBlock(60);
         });
     }
 
-    protected void logoutForced() {
-        Platform.runLater(() -> {
-            try {
-                Stage stage = (Stage) timerLabel.getScene().getWindow();
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml_file/login.fxml"));
-                stage.setScene(new Scene(loader.load()));
-                stage.setTitle("Авторизация");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
-    @FXML
-    protected void handleLogout() {
-        logoutForced();
+    @Override
+    protected void stopAllTimers() {
+        super.stopAllTimers();
+        if (quartzTimer != null) {
+            quartzTimer.stop();
+        }
     }
 }

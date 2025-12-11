@@ -7,24 +7,51 @@
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.example.trash.controllers.LabController"
-      alignment="CENTER" spacing="20"
+      alignment="CENTER"
+      spacing="20"
       style="-fx-padding: 20; -fx-background-color: #FFFFFF; -fx-font-family: 'Comic Sans MS';">
 
-    <HBox spacing="10" alignment="CENTER" style="-fx-background-color: #76E383; -fx-padding: 10;">
+    <!-- Заголовок с пользователем -->
+    <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-background-color: #76E383; -fx-padding: 10;">
         <ImageView fitWidth="40" fitHeight="40" preserveRatio="true">
-            <image>
-                <Image url="@../import/photo/Логотип.png"/>
-            </image>
+            <Image url="@../import/photo/Логотип.png"/>
         </ImageView>
-        <Label text="Рабочее окно лаборанта" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+        <VBox spacing="2">
+            <Label fx:id="userNameLabel" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+            <Label fx:id="userRoleLabel" style="-fx-font-size: 12px; -fx-text-fill: #333;"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <ImageView fx:id="userAvatar" fitWidth="40" fitHeight="40" preserveRatio="true"
+                   style="-fx-border-radius: 20; -fx-border-color: white;"/>
     </HBox>
 
-    <Label fx:id="timerLabel" text="02:00" style="-fx-font-size: 18; -fx-text-fill: green;"/>
+    <Label fx:id="welcomeLabel"
+           text="Добро пожаловать, Лаборант!"
+           style="-fx-font-size: 16px;"/>
+
+    <Label fx:id="timerLabel"
+           text="02:00"
+           style="-fx-font-size: 18; -fx-text-fill: green;"/>
 
     <HBox spacing="10">
-        <Button text="Принять отходы" onAction="#handleTakeWaste" style="-fx-background-color: #498C51; -fx-text-fill: white;"/>
-        <Button text="Сформировать отчёт" onAction="#handleReport" style="-fx-background-color: #498C51; -fx-text-fill: white;"/>
-        <Button text="Выход" onAction="#handleLogout" style="-fx-background-color: #498C51; -fx-text-fill: white;"/>
-    </HBox>
-</VBox>
+        <Button fx:id="takeWasteButton"
+                text="Принять отходы"
+                onAction="#handleTakeWaste"
+                style="-fx-background-color: #498C51; -fx-text-fill: white;"/>
 
+        <Button fx:id="reportButton"
+                text="Сформировать отчёт"
+                onAction="#handleReport"
+                style="-fx-background-color: #498C51; -fx-text-fill: white;"/>
+
+        <Button fx:id="logoutButton"
+                text="Выход"
+                onAction="#handleLogout"
+                style="-fx-background-color: #498C51; -fx-text-fill: white;"/>
+    </HBox>
+
+    <Label fx:id="userStatusLabel"
+           text="Статус: загрузка..."
+           style="-fx-text-fill: gray; -fx-font-size: 12px;"/>
+
+</VBox>

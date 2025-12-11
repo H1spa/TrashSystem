@@ -2,8 +2,11 @@ package com.example.trash.controllers;
 
 import com.example.trash.dao.UserDAO;
 import com.example.trash.model.User;
+import com.example.trash.dao.SessionDAO;
+import com.example.trash.dao.NotificationDAO;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -12,6 +15,11 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.net.InetAddress;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 
 public class LoginController {
 
@@ -32,6 +40,57 @@ public class LoginController {
     private boolean captchaCooldown = false;
     private int captchaCooldownSeconds = 0;
     private Timeline captchaCooldownTimer;
+
+    // === Метод для обработки предыдущих сессий ===
+    private void handlePreviousSessions(int userId, String currentIp) {
+        try {
+            // Получаем все активные сессии пользователя
+            List<com.example.trash.model.Session> activeSessions = SessionDAO.getActiveSessionsByUser(userId);
+            StringBuilder previousIPs = new StringBuilder();
+
+            for (com.example.trash.model.Session session : activeSessions) {
+                // Если сессия активна и IP отличается от текущего
+                if (session.isActive() && !session.getIpAddress().equals(currentIp)) {
+                    if (previousIPs.length() > 0) {
+                        previousIPs.append(", ");
+                    }
+                    previousIPs.append(session.getIpAddress());
+
+                    // Создаем уведомление для предыдущей сессии
+                    String disconnectMessage = "Произведен новый вход в учетную запись с компьютера IP: " +
+                            currentIp + ". Текущий сеанс завершен.";
+                    NotificationDAO.createNotification(
+                            userId,
+                            0, // от системы
+                            disconnectMessage,
+                            "DISCONNECT"
+                    );
+
+                    // Завершаем предыдущую сессию
+                    SessionDAO.endSessionById(session.getId());
+                }
+            }
+
+            // Если были обнаружены предыдущие сессии, создаем уведомление для текущего пользователя
+            if (previousIPs.length() > 0) {
+                String infoMessage = "Обнаружены незавершенные сеансы на компьютерах с IP: " +
+                        previousIPs.toString() + ". Эти сеансы завершены.";
+                NotificationDAO.createNotification(userId, 0, infoMessage, "INFO");
+
+                // Показываем предупреждение текущему пользователю
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setTitle("Предыдущие сеансы");
+                    alert.setHeaderText("Обнаружены незавершенные сеансы");
+                    alert.setContentText("На компьютерах с IP " + previousIPs.toString() +
+                            " были обнаружены незавершенные сеансы. Они были завершены.");
+                    alert.show();
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     // === Статические методы для управления блокировкой ===
     public static void startGlobalBlock(int seconds) {
@@ -88,6 +147,9 @@ public class LoginController {
 
         // Настройка обработчика для блока Label
         setupBlockLabelUpdater();
+
+        // Автофокус на поле логина
+        Platform.runLater(() -> loginField.requestFocus());
     }
 
     private void checkBlockStatus() {
@@ -162,7 +224,6 @@ public class LoginController {
             return;
         }
 
-        // Проверка заполнения всех полей
         String login = loginField.getText();
         String password = passwordField.getText();
         String selectedRole = roleBox.getValue();
@@ -179,16 +240,40 @@ public class LoginController {
         User user = userDAO.findByLoginAndPassword(login, password);
 
         if (user != null) {
+            // Проверяем, не заблокирован ли пользователь
+            if (UserDAO.isUserBlocked(user.getId())) {
+                messageLabel.setText("Учетная запись заблокирована администратором!");
+                UserDAO.logLoginAttempt(user.getId(), ipAddress, false);
+                return;
+            }
+
             // Проверяем соответствие выбранной роли типу пользователя
-            if (isRoleMatching(user.getType(), selectedRole)) {
-                // Логируем успешный вход
-                UserDAO.logLoginAttempt(user.getId(), ipAddress, true);
+            if (isRoleMatching(String.valueOf(user.getType()), selectedRole)) {
+                // Проверяем и завершаем предыдущие сессии пользователя
+                handlePreviousSessions(user.getId(), ipAddress);
 
-                // Сбрасываем счетчик неудачных попыток
-                resetFailedAttempts();
+                // Сохраняем текущего пользователя в SessionManager
+                SessionManager.setCurrentUserId(user.getId());
+                SessionManager.setCurrentUserRole(selectedRole);
 
-                // Переходим на главное окно системы
-                openMainWindow(user, selectedRole);
+                // Создаем новую сессию
+                int sessionId = SessionDAO.createSession(user.getId(), ipAddress);
+
+                if (sessionId > 0) {
+                    // Сохраняем ID сессии в SessionManager
+                    SessionManager.setCurrentSessionId(String.valueOf(sessionId));
+
+                    // Логируем успешный вход
+                    UserDAO.logLoginAttempt(user.getId(), ipAddress, true);
+
+                    // Сбрасываем счетчик неудачных попыток
+                    resetFailedAttempts();
+
+                    // Переходим на главное окно системы
+                    openMainWindow(user, selectedRole);
+                } else {
+                    messageLabel.setText("Ошибка создания сессии!");
+                }
 
             } else {
                 // Неправильная роль для данного пользователя
@@ -204,13 +289,12 @@ public class LoginController {
         }
     }
 
-    // Метод для проверки соответствия типа пользователя выбранной роли
     private boolean isRoleMatching(String userType, String selectedRole) {
         if (userType == null || selectedRole == null) {
             return false;
         }
 
-        // Маппинг типов пользователей (type_user_id) на роли в интерфейсе
+
         switch (selectedRole) {
             case "Администратор":
                 return userType.equals("1");
@@ -295,14 +379,6 @@ public class LoginController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Scene scene = new Scene(loader.load());
 
-            // Передаем информацию о пользователе, если необходимо
-            // (можно передавать через конструктор или сеттеры)
-            if (role.equals("Администратор")) {
-                // Можно передать данные администратору при необходимости
-                AdminController adminController = loader.getController();
-                // Например: adminController.setCurrentUser(user);
-            }
-
             // Устанавливаем новую сцену на текущем окне
             currentStage.setScene(scene);
             currentStage.setTitle(title);
@@ -378,5 +454,72 @@ public class LoginController {
 
         captchaCooldownTimer.setCycleCount(captchaCooldownSeconds);
         captchaCooldownTimer.play();
+    }
+
+    // Проверка блокировки пользователя
+    private boolean isUserBlocked(int userId) {
+        String sql = "SELECT archived FROM users WHERE id = ?";
+        try (Connection conn = com.example.trash.db.DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getBoolean("archived");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // Обработка нажатия клавиши Enter в полях ввода
+    @FXML
+    private void handleEnterPressed(javafx.scene.input.KeyEvent event) {
+        if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
+            handleLogin();
+        }
+    }
+
+    public static class SessionManager {
+        private static int currentUserId;
+        private static String currentSessionId;
+        private static String currentUserRole;
+
+        public static void setCurrentUserId(int userId) {
+            currentUserId = userId;
+        }
+
+        public static int getCurrentUserId() {
+            return currentUserId;
+        }
+
+        public static void setCurrentUserRole(String userRole) {
+            currentUserRole = userRole;
+        }
+
+        public static String getCurrentUserRole() {
+            return currentUserRole;
+        }
+
+        public static void setCurrentSessionId(String sessionId) {
+            currentSessionId = sessionId;
+        }
+
+        public static String getCurrentSessionId() {
+            return currentSessionId;
+        }
+
+        public static void logout() {
+            // Завершаем сессию пользователя
+            if (currentUserId > 0) {
+                SessionDAO.endSession(currentUserId);
+                UserDAO.disconnectUser(currentUserId);
+            }
+
+            // Сбрасываем все данные
+            currentUserId = 0;
+            currentSessionId = null;
+            currentUserRole = null;
+        }
     }
 }

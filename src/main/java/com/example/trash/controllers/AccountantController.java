@@ -1,38 +1,45 @@
 package com.example.trash.controllers;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
-public class AccountantController {
+public class AccountantController extends BaseController {
 
     @FXML
     private Button logoutButton;
+    @FXML
+    private Button viewReportsButton;
+    @FXML
+    private Button createInvoiceButton;
+    @FXML
+    private Label welcomeLabel;
+    @FXML
+    private ImageView userAvatar;
+
+    @FXML
+    @Override
+    public void initialize() {
+        super.initialize();
+        welcomeLabel.setText("Добро пожаловать, Бухгалтер!");
+    }
 
     @FXML
     private void handleViewReports() {
+        // TODO: Реализовать просмотр отчетов
         System.out.println("Просмотр отчётов...");
-        // Логика просмотра отчётов
     }
 
     @FXML
     private void handleCreateInvoice() {
+        // TODO: Реализовать формирование счета
         System.out.println("Формирование счёта предприятию...");
-        // Логика формирования счёта
     }
 
-    @FXML
-    private void handleLogout() {
-        try {
-            Stage stage = (Stage) logoutButton.getScene().getWindow();
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml_file/login.fxml"));
-            stage.setScene(new Scene(loader.load()));
-            stage.setTitle("Авторизация");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    @Override
+    protected Stage getCurrentStage() {
+        return (Stage) logoutButton.getScene().getWindow();
     }
 }
-

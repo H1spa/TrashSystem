@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<DialogPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.trash.controllers.AddClientController">
+
+    <headerText>
+        Добавление нового клиента
+    </headerText>
+
+    <content>
+        <VBox spacing="10" style="-fx-padding: 10;">
+            <!-- Основные поля -->
+            <GridPane hgap="10" vgap="10">
+                <columnConstraints>
+                    <ColumnConstraints halignment="RIGHT" prefWidth="150"/>
+                    <ColumnConstraints prefWidth="250"/>
+                </columnConstraints>
+
+                <rowConstraints>
+                    <RowConstraints prefHeight="30"/>
+                    <RowConstraints prefHeight="30"/>
+                    <RowConstraints prefHeight="30"/>
+                    <RowConstraints prefHeight="30"/>
+                    <RowConstraints prefHeight="30"/>
+                    <RowConstraints prefHeight="30"/>
+                    <RowConstraints prefHeight="30"/>
+                </rowConstraints>
+
+                <Label text="ФИО:" GridPane.rowIndex="0"/>
+                <TextField fx:id="fioField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Дата рождения:" GridPane.rowIndex="1"/>
+                <DatePicker fx:id="birthDatePicker" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Паспорт (серия):" GridPane.rowIndex="2"/>
+                <TextField fx:id="passportSeriesField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <Label text="Паспорт (номер):" GridPane.rowIndex="3"/>
+                <TextField fx:id="passportNumberField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                <Label text="Телефон:" GridPane.rowIndex="4"/>
+                <TextField fx:id="phoneField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                <Label text="Email:" GridPane.rowIndex="5"/>
+                <TextField fx:id="emailField" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                <Label text="Тип клиента:" GridPane.rowIndex="6"/>
+                <ComboBox fx:id="clientTypeComboBox" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+            </GridPane>
+
+            <!-- Поля для юрлиц -->
+            <VBox spacing="10" style="-fx-padding: 10 0 0 0;">
+                <Label text="Информация о компании:" style="-fx-font-weight: bold;"/>
+
+                <GridPane hgap="10" vgap="10">
+                    <columnConstraints>
+                        <ColumnConstraints halignment="RIGHT" prefWidth="150"/>
+                        <ColumnConstraints prefWidth="250"/>
+                    </columnConstraints>
+
+                    <rowConstraints>
+                        <RowConstraints prefHeight="30"/>
+                        <RowConstraints prefHeight="30"/>
+                        <RowConstraints prefHeight="30"/>
+                        <RowConstraints prefHeight="30"/>
+                    </rowConstraints>
+
+                    <Label text="Существующая компания:" GridPane.rowIndex="0"/>
+                    <ComboBox fx:id="companyComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                    <Label text="Или новая компания:" GridPane.rowIndex="1"/>
+                    <TextField fx:id="newCompanyField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                    <Label text="Адрес компании:" GridPane.rowIndex="2"/>
+                    <TextField fx:id="companyAddressField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                    <Label text="ИНН компании:" GridPane.rowIndex="3"/>
+                    <TextField fx:id="companyINNField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                </GridPane>
+            </VBox>
+        </VBox>
+    </content>
+
+    <buttonTypes>
+        <ButtonType text="Сохранить" buttonData="OK_DONE"/>
+        <ButtonType text="Отмена" buttonData="CANCEL_CLOSE"/>
+    </buttonTypes>
+</DialogPane>

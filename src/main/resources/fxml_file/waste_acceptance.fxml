@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.trash.controllers.WasteAcceptanceController"
+      spacing="10"
+      style="-fx-padding: 15; -fx-background-color: white;">
+
+    <!-- Заголовок с пользователем -->
+    <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-background-color: #76E383; -fx-padding: 10;">
+        <Label text="Прием отходов" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="userNameLabel" style="-fx-font-size: 14px;"/>
+        <Label fx:id="userRoleLabel" style="-fx-font-size: 12px; -fx-text-fill: #333;"/>
+    </HBox>
+
+    <!-- Таймер сессии -->
+    <HBox spacing="10" alignment="CENTER">
+        <Label text="Время сессии:" style="-fx-font-weight: bold;"/>
+        <Label fx:id="timerLabel" text="02:00" style="-fx-font-size: 18; -fx-text-fill: green;"/>
+    </HBox>
+
+    <!-- Код кейса -->
+    <VBox spacing="5">
+        <Label text="Код кейса (нажмите Enter для подтверждения):"/>
+        <HBox spacing="10">
+            <TextField fx:id="caseCodeField" prefWidth="200"/>
+            <Button fx:id="scanQRButton" text="Сканировать QR" onAction="#handleScanQR"
+                    style="-fx-background-color: #498C51; -fx-text-fill: white;"/>
+        </HBox>
+        <Label fx:id="orderNumberLabel" text="Следующий номер заказа: -" style="-fx-font-style: italic;"/>
+    </VBox>
+
+    <!-- Поиск клиента -->
+    <VBox spacing="5">
+        <Label text="Поиск клиента (минимум 5 символов):"/>
+        <HBox spacing="10">
+            <TextField fx:id="clientSearchField" prefWidth="300"/>
+            <Button text="Добавить клиента" onAction="#handleAddClient"
+                    style="-fx-background-color: #498C51; -fx-text-fill: white;"/>
+        </HBox>
+
+        <TableView fx:id="clientTable" prefHeight="150" prefWidth="500">
+            <columns>
+                <TableColumn fx:id="colClientName" text="ФИО" prefWidth="300"/>
+                <TableColumn fx:id="colClientPhone" text="Телефон" prefWidth="200"/>
+            </columns>
+        </TableView>
+    </VBox>
+
+    <!-- Поиск и выбор услуг -->
+    <VBox spacing="5">
+        <Label text="Поиск услуг (минимум 5 символов):"/>
+        <TextField fx:id="serviceSearchField" prefWidth="300"/>
+
+        <HBox spacing="20" alignment="CENTER">
+            <!-- Доступные услуги -->
+            <VBox spacing="5">
+                <Label text="Доступные услуги:"/>
+                <TableView fx:id="serviceTable" prefHeight="200" prefWidth="400">
+                    <columns>
+                        <TableColumn fx:id="colServiceName" text="Наименование" prefWidth="250"/>
+                        <TableColumn fx:id="colServiceCost" text="Стоимость" prefWidth="150"/>
+                    </columns>
+                </TableView>
+                <Button fx:id="addServiceButton" text="Добавить >>" onAction="#handleAddService"
+                        style="-fx-background-color: #498C51; -fx-text-fill: white;"/>
+            </VBox>
+
+            <!-- Выбранные услуги -->
+            <VBox spacing="5">
+                <Label text="Выбранные услуги:"/>
+                <TableView fx:id="selectedServicesTable" prefHeight="200" prefWidth="400"/>
+                <Button fx:id="removeServiceButton" text="Удалить" onAction="#handleRemoveService"
+                        style="-fx-background-color: #FF6B6B; -fx-text-fill: white;"/>
+            </VBox>
+        </HBox>
+    </VBox>
+
+    <!-- Итого и кнопки -->
+    <HBox spacing="20" alignment="CENTER">
+        <Label fx:id="totalCostLabel" text="Итого: 0.00 руб."
+               style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="createOrderButton" text="Создать заказ" onAction="#handleCreateOrder"
+                style="-fx-background-color: #498C51; -fx-text-fill: white; -fx-font-weight: bold;"/>
+        <Button fx:id="logoutButton" text="Выход" onAction="#handleLogout"
+                style="-fx-background-color: #666666; -fx-text-fill: white;"/>
+        <Button fx:id="scanFromFileButton" text="Загрузить QR из файла" onAction="#handleScanFromFile"
+                style="-fx-background-color: #5D6D7E; -fx-text-fill: white;"/>
+    </HBox>
+
+    <!-- Статус -->
+    <Label fx:id="userStatusLabel" text="Статус: загрузка..."
+           style="-fx-text-fill: gray; -fx-font-size: 12px;"/>
+
+</VBox>

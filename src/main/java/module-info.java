@@ -4,8 +4,11 @@ module com.example.trash {
     requires org.controlsfx.controls;
     requires com.dlsc.formsfx;
     requires org.kordamp.bootstrapfx.core;
-    requires java.sql;
     requires java.desktop;
+    requires com.google.gson;
+    requires java.sql;
+    requires kernel;
+    requires layout;
 
     // Открываем пакеты для JavaFX рефлексии
     opens com.example.trash to javafx.fxml;

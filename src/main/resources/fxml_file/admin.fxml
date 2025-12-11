@@ -3,47 +3,54 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
-<?import javafx.geometry.Insets?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.example.trash.controllers.AdminController"
-            style="-fx-background-color: #FFFFFF; -fx-font-family: 'Comic Sans MS';">
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.trash.controllers.AdminController"
+      spacing="10.0" style="-fx-background-color: #FFFFFF; -fx-font-family: 'Comic Sans MS';">
 
-    <top>
-        <HBox spacing="10" style="-fx-background-color: #76E383;">
-            <padding>
-                <Insets top="10" right="10" bottom="10" left="10"/>
-            </padding>
-            <ImageView fitWidth="40" fitHeight="40" preserveRatio="true">
-                <image>
-                    <Image url="@../import/photo/Логотип.png"/>
-                </image>
-            </ImageView>
-            <Label text="Добро пожаловать, администратор!"
-                   style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
-            <Button text="Обновить" onAction="#handleRefresh" style="-fx-background-color: #498C51; -fx-text-fill: white;"/>
-            <Button text="История входа" onAction="#handleViewHistory" style="-fx-background-color: #498C51; -fx-text-fill: white;"/>
-            <Button text="Пользователи" onAction="#handleManageUsers" style="-fx-background-color: #498C51; -fx-text-fill: white;"/>
-            <Button text="Выход" onAction="#handleLogout" style="-fx-background-color: #498C51; -fx-text-fill: white;"/>
-        </HBox>
-    </top>
-
-    <center>
-        <VBox spacing="10" style="-fx-padding: 10;">
-            <Label text="Онлайн пользователи" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-            <TableView fx:id="onlineUsersTable" style="-fx-background-color: white;" VBox.vgrow="ALWAYS">
-                <columns>
-                    <TableColumn fx:id="colId" text="ID" prefWidth="50"/>
-                    <TableColumn fx:id="colUser" text="ФИО пользователя" prefWidth="200"/>
-                    <TableColumn fx:id="colIp" text="IP-адрес" prefWidth="150"/>
-                    <TableColumn fx:id="colSessionTime" text="Текущая сессия" prefWidth="120"/>
-                    <TableColumn fx:id="colDailyTime" text="Время за день" prefWidth="120"/>
-                    <TableColumn fx:id="colTime" text="Последний вход" prefWidth="150"/>
-                </columns>
-            </TableView>
-
-            <Label text="Двойной клик по строке - подробная информация. ПКМ - действия администратора."
-                   style="-fx-font-size: 11px; -fx-text-fill: #666;"/>
+    <!-- Заголовок с пользователем -->
+    <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-background-color: #76E383; -fx-padding: 10;">
+        <ImageView fitWidth="40" fitHeight="40" preserveRatio="true">
+            <Image url="@../import/photo/Логотип.png"/>
+        </ImageView>
+        <VBox spacing="2">
+            <Label fx:id="userNameLabel" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+            <Label fx:id="userRoleLabel" style="-fx-font-size: 12px; -fx-text-fill: #333;"/>
         </VBox>
-    </center>
-</BorderPane>
+        <Region HBox.hgrow="ALWAYS"/>
+        <ImageView fx:id="adminAvatar" fitWidth="40" fitHeight="40" preserveRatio="true"
+                   style="-fx-border-radius: 20; -fx-border-color: white;"/>
+    </HBox>
+
+    <!-- Остальной код остается прежним -->
+    <HBox spacing="10.0" alignment="CENTER_LEFT">
+        <Label text="Мониторинг пользователей" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Обновить" fx:id="btnRefresh" onAction="#handleRefresh"/>
+        <Button text="История входа" fx:id="btnViewHistory" onAction="#handleViewHistory"/>
+        <Button text="Управление пользователями" fx:id="btnManageUsers" onAction="#handleManageUsers"/>
+        <Button text="Экспорт отчета" fx:id="btnExportReport" onAction="#handleExportReport"/>
+        <Button text="Выход" fx:id="btnLogout" onAction="#handleLogout" style="-fx-text-fill: red;"/>
+    </HBox>
+
+    <TableView fx:id="onlineUsersTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn text="ID" fx:id="colId" prefWidth="50.0"/>
+            <TableColumn text="Пользователь" fx:id="colUser" prefWidth="150.0"/>
+            <TableColumn text="Последняя активность" fx:id="colTime" prefWidth="150.0"/>
+            <TableColumn text="IP-адрес" fx:id="colIp" prefWidth="120.0"/>
+            <TableColumn text="Время сессии" fx:id="colSessionTime" prefWidth="100.0"/>
+            <TableColumn text="Время за день" fx:id="colDailyTime" prefWidth="100.0"/>
+            <TableColumn text="Статус" fx:id="colStatus" prefWidth="100.0"/>
+        </columns>
+        <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+        </columnResizePolicy>
+    </TableView>
+
+    <Label text="Двойной клик по строке - просмотр деталей. ПКМ - действия администратора."
+           style="-fx-font-style: italic; -fx-text-fill: gray;"/>
+
+    <Label fx:id="userStatusLabel" text="Статус: загрузка..."
+           style="-fx-text-fill: gray; -fx-font-size: 12px;"/>
+</VBox>
