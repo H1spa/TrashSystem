@@ -226,4 +226,96 @@ public class OrderDAO {
             return false;
         }
     }
+    // Получить заказы за сегодня
+    public static List<Order> getTodayOrders() {
+        List<Order> orders = new ArrayList<>();
+        String sql = "SELECT * FROM orders WHERE DATE(created_at) = CURDATE() AND archived = 0";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Order order = new Order();
+                order.setId(rs.getInt("id"));
+                order.setOrderNumber(rs.getInt("order_number"));
+                order.setClientId(rs.getInt("client_id"));
+                order.setCaseCode(rs.getString("case_code"));
+                order.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                order.setStatus(rs.getString("status"));
+
+                // Получаем услуги
+                List<Integer> services = getOrderServices(order.getId());
+                order.setServices(services);
+
+                orders.add(order);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return orders;
+    }
+
+    // Получить все заказы
+    public static List<Order> getAllOrders() {
+        List<Order> orders = new ArrayList<>();
+        String sql = "SELECT * FROM orders WHERE archived = 0 ORDER BY created_at DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Order order = new Order();
+                order.setId(rs.getInt("id"));
+                order.setOrderNumber(rs.getInt("order_number"));
+                order.setClientId(rs.getInt("client_id"));
+                order.setCaseCode(rs.getString("case_code"));
+                order.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                order.setStatus(rs.getString("status"));
+
+                // Получаем услуги
+                List<Integer> services = getOrderServices(order.getId());
+                order.setServices(services);
+
+                orders.add(order);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return orders;
+    }
+
+    // Получить заказы за месяц
+    public static List<Order> getMonthOrders() {
+        List<Order> orders = new ArrayList<>();
+        String sql = "SELECT * FROM orders WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) AND archived = 0 ORDER BY created_at DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Order order = new Order();
+                order.setId(rs.getInt("id"));
+                order.setOrderNumber(rs.getInt("order_number"));
+                order.setClientId(rs.getInt("client_id"));
+                order.setCaseCode(rs.getString("case_code"));
+                order.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                order.setStatus(rs.getString("status"));
+
+                // Получаем услуги
+                List<Integer> services = getOrderServices(order.getId());
+                order.setServices(services);
+
+                orders.add(order);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return orders;
+    }
 }

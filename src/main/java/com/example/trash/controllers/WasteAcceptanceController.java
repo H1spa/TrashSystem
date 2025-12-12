@@ -4,10 +4,13 @@ import com.example.trash.dao.*;
 import com.example.trash.model.*;
 import com.example.trash.util.Base64Generator;
 import com.example.trash.util.PDFGenerator;
+import com.example.trash.util.TextQRParser;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -160,32 +163,31 @@ public class WasteAcceptanceController extends BaseLabController {
     private void handleAddClient() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml_file/add_client.fxml"));
-
-            // Загружаем как DialogPane, а не VBox
-            DialogPane dialogPane = loader.load();
-
-            // Создаем диалоговое окно
-            Dialog<ButtonType> dialog = new Dialog<>();
-            dialog.setDialogPane(dialogPane);
-            dialog.setTitle("Добавление клиента");
-            dialog.initModality(Modality.WINDOW_MODAL);
-            dialog.initOwner(caseCodeField.getScene().getWindow());
+            AnchorPane root = loader.load(); // <-- ПРАВИЛЬНО: AnchorPane, а не DialogPane
 
             AddClientController controller = loader.getController();
 
-            // Показываем диалог и ждем результата
-            Optional<ButtonType> result = dialog.showAndWait();
+            // Создаем обычное окно вместо диалога
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Добавление клиента");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(caseCodeField.getScene().getWindow());
+            dialogStage.setScene(new Scene(root));
 
-            if (result.isPresent() && result.get() == ButtonType.OK) {
-                // Если в контроллере есть метод isOkClicked()
-                if (controller.isOkClicked()) {
-                    // Обновить список клиентов
-                    String currentSearch = clientSearchField.getText();
-                    if (currentSearch.length() >= 5) {
-                        searchClients(currentSearch);
-                    }
+            controller.setDialogStage(dialogStage);
+
+            // Показываем и ждем закрытия
+            dialogStage.showAndWait();
+
+            // После закрытия окна проверяем результат
+            if (controller.isOkClicked()) {
+                // Обновить список клиентов
+                String currentSearch = clientSearchField.getText();
+                if (currentSearch.length() >= 5) {
+                    searchClients(currentSearch);
                 }
             }
+
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Ошибка", "Не удалось открыть окно добавления клиента: " + e.getMessage());
@@ -239,42 +241,93 @@ public class WasteAcceptanceController extends BaseLabController {
     }
 
     private void processQRData(String qrData) {
+        System.out.println("\n=== НАЧАЛО ОБРАБОТКИ QR ДАННЫХ ===");
+
         try {
-            // Парсим JSON данные
-            com.google.gson.Gson gson = new com.google.gson.Gson();
-            QRData qrDataObj = gson.fromJson(qrData, QRData.class);
+            // 1. Пытаемся распарсить как JSON (для совместимости со старым форматом)
+            boolean isJsonParsed = false;
 
-            Platform.runLater(() -> {
-                // Установка кода кейса
-                if (qrDataObj.getCaseCode() != null && !qrDataObj.getCaseCode().isEmpty()) {
-                    caseCodeField.setText(qrDataObj.getCaseCode());
+            try {
+                com.google.gson.Gson gson = new com.google.gson.Gson();
+                QRData jsonData = gson.fromJson(qrData, QRData.class);
+
+                if (jsonData != null && jsonData.getClientData() != null &&
+                        jsonData.getClientData().getFio() != null) {
+                    System.out.println("Данные распознаны как JSON формат");
+                    fillFormFromQRData(jsonData);
+                    isJsonParsed = true;
+                }
+            } catch (Exception e) {
+                System.out.println("Не JSON формат: " + e.getMessage());
+            }
+
+            // 2. Если JSON не распарсился, используем текстовый парсер
+            if (!isJsonParsed) {
+                System.out.println("Используем текстовый парсер...");
+                QRData parsedData = TextQRParser.parseTextFormat(qrData);
+                fillFormFromQRData(parsedData);
+            }
+
+            showAlert("Данные загружены", "Данные из QR-кода успешно загружены в форму");
+
+        } catch (Exception e) {
+            System.err.println("КРИТИЧЕСКАЯ ОШИБКА при обработке QR: " + e.getMessage());
+            e.printStackTrace();
+            showAlert("Ошибка", "Не удалось обработать QR-код. Проверьте формат данных.");
+        }
+
+        System.out.println("=== ЗАВЕРШЕНИЕ ОБРАБОТКИ QR ДАННЫХ ===\n");
+    }
+
+    /**
+     * Заполнение полей формы из распарсенных данных
+     */
+    private void fillFormFromQRData(QRData qrData) {
+        Platform.runLater(() -> {
+            // 1. Код кейса
+            if (qrData.getCaseCode() != null && !qrData.getCaseCode().isEmpty()) {
+                caseCodeField.setText(qrData.getCaseCode());
+                System.out.println("Установлен код кейса: " + qrData.getCaseCode());
+            } else {
+                // Автопредложение кода
+                int lastOrderNumber = OrderDAO.getLastOrderNumber();
+                caseCodeField.setText(String.valueOf(lastOrderNumber + 1));
+                System.out.println("Код кейса не указан, предложен: " + (lastOrderNumber + 1));
+            }
+
+            // 2. Клиент
+            if (qrData.getClientData() != null) {
+                QRData.ClientData client = qrData.getClientData();
+
+                // Поиск клиента в базе
+                if (client.getFio() != null && !client.getFio().isEmpty()) {
+                    clientSearchField.setText(client.getFio());
+                    System.out.println("Поиск клиента: " + client.getFio());
+                    searchClients(client.getFio());
                 }
 
-                // Поиск клиента
-                if (qrDataObj.getClientData() != null && qrDataObj.getClientData().getFio() != null) {
-                    String searchQuery = qrDataObj.getClientData().getFio();
-                    if (searchQuery.length() >= 5) {
-                        clientSearchField.setText(searchQuery);
-                        searchClients(searchQuery);
-                    }
-                }
+                // 3. Услуги
+                if (qrData.getServices() != null && !qrData.getServices().isEmpty()) {
+                    System.out.println("Добавление услуг: " + qrData.getServices());
 
-                // Добавление услуг
-                if (qrDataObj.getServices() != null) {
-                    for (String serviceName : qrDataObj.getServices()) {
-                        Service service = ServiceDAO.getServiceByName(serviceName);
+                    for (String serviceName : qrData.getServices()) {
+                        // Ищем услугу по коду или названию
+                        Service service = ServiceDAO.getServiceByCode(serviceName);
+                        if (service == null) {
+                            service = ServiceDAO.getServiceByName(serviceName);
+                        }
+
                         if (service != null && !selectedServices.contains(service)) {
                             selectedServices.add(service);
+                            System.out.println("  Добавлена услуга: " + service.getName());
+                        } else if (service == null) {
+                            System.out.println("  Услуга не найдена: " + serviceName);
                         }
                     }
                     updateTotalCost();
                 }
-
-                showAlert("Успех", "Данные из QR-кода успешно загружены");
-            });
-        } catch (Exception e) {
-            showAlert("Ошибка", "Неверный формат QR-кода: " + e.getMessage());
-        }
+            }
+        });
     }
 
     @FXML
@@ -363,10 +416,14 @@ public class WasteAcceptanceController extends BaseLabController {
             Client client = ClientDAO.getClientById(order.getClientId());
             List<Service> orderServices = ServiceDAO.getServicesByIds(order.getServices());
 
-            // Генерация PDF
-            PDFGenerator.generateOrderPDF(order, client, orderServices);
+            // Генерация PDF с выбором пути
+            File pdfFile = PDFGenerator.generateOrderPDF(order, client, orderServices, getCurrentStage());
 
-            showAlert("PDF создан", "Документ заказа сохранен в файл order_" + order.getOrderNumber() + ".pdf");
+            if (pdfFile != null) {
+                showAlert("PDF создан", "Документ заказа сохранен в файл:\n" + pdfFile.getAbsolutePath());
+            } else {
+                showAlert("Информация", "Сохранение PDF отменено");
+            }
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Ошибка", "Не удалось сгенерировать PDF: " + e.getMessage());
@@ -379,13 +436,14 @@ public class WasteAcceptanceController extends BaseLabController {
             Client client = ClientDAO.getClientById(order.getClientId());
             List<Service> orderServices = ServiceDAO.getServicesByIds(order.getServices());
 
-            // Генерация Base64
-            String base64Data = Base64Generator.generateOrderLink(order, client, orderServices);
+            // Генерация Base64 с выбором пути
+            File base64File = Base64Generator.generateOrderLinkWithSaveDialog(order, client, orderServices, getCurrentStage());
 
-            // Сохранение в файл
-            Base64Generator.saveToTextFile(base64Data, "order_" + order.getOrderNumber() + ".txt");
-
-            showAlert("Ссылка создана", "Base64 ссылка сохранена в файл order_" + order.getOrderNumber() + ".txt");
+            if (base64File != null) {
+                showAlert("Ссылка создана", "Base64 ссылка сохранена в файл:\n" + base64File.getAbsolutePath());
+            } else {
+                showAlert("Информация", "Сохранение Base64 ссылки отменено");
+            }
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Ошибка", "Не удалось сгенерировать ссылку: " + e.getMessage());

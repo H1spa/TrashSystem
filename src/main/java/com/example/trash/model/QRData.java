@@ -13,6 +13,11 @@ public class QRData {
         private String phone;
         private String email;
         private String companyName;
+        private String passport; // Добавьте это поле
+
+        // Геттеры и сеттеры для нового поля
+        public String getPassport() { return passport; }
+        public void setPassport(String passport) { this.passport = passport; }
 
         public ClientData() {}
 

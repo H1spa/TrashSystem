@@ -14,9 +14,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.io.File;
 import java.util.Optional;
 
 public class AdminController extends BaseController {
@@ -144,10 +146,58 @@ public class AdminController extends BaseController {
     @FXML
     private void handleExportReport() {
         try {
-            exportToCSV();
+            // Создаем FileChooser для выбора пути сохранения
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Сохранить отчет как CSV");
+            fileChooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("CSV файлы", "*.csv"),
+                    new FileChooser.ExtensionFilter("Текстовые файлы", "*.txt"),
+                    new FileChooser.ExtensionFilter("Все файлы", "*.*")
+            );
+
+            // Устанавливаем имя файла по умолчанию
+            String defaultFileName = "отчет_пользователей_" +
+                    java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")) + ".csv";
+            fileChooser.setInitialFileName(defaultFileName);
+
+            // Показываем диалог сохранения
+            Stage stage = (Stage) onlineUsersTable.getScene().getWindow();
+            File file = fileChooser.showSaveDialog(stage);
+
+            if (file != null) {
+                // Формируем CSV содержимое
+                StringBuilder csvContent = new StringBuilder();
+                csvContent.append("ID;Имя пользователя;Логин;IP-адрес;Текущая сессия;Время за день;Статус\n");
+
+                for (User user : onlineUsersTable.getItems()) {
+                    csvContent.append(String.format("%d;%s;%s;%s;%s;%s;%s\n",
+                            user.getId(),
+                            user.getName(),
+                            user.getLogin(),
+                            user.getDisplayIp(),
+                            user.getCurrentSessionTime(),
+                            user.getDailyWorkTimeFormatted(),
+                            user.getStatus()
+                    ));
+                }
+
+                // Сохраняем в выбранный файл
+                saveCSVToFile(file.getAbsolutePath(), csvContent.toString());
+
+                showAlert("Успех",
+                        "Отчет сохранен в файл: " + file.getAbsolutePath(),
+                        Alert.AlertType.INFORMATION);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Ошибка", "Ошибка при экспорте: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
+
+    private void saveCSVToFile(String filePath, String content) throws Exception {
+        try (java.io.PrintWriter writer = new java.io.PrintWriter(
+                new java.io.FileWriter(filePath, java.nio.charset.StandardCharsets.UTF_8))) {
+            writer.write(content);
         }
     }
 

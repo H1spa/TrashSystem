@@ -8,7 +8,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+import java.io.File;
 
 public class LoginHistoryController {
 
@@ -105,10 +108,58 @@ public class LoginHistoryController {
 
     @FXML
     private void handleExport() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Экспорт данных");
-        alert.setHeaderText("Экспорт истории входа");
-        alert.setContentText("Функция экспорта будет реализована в следующем обновлении");
-        alert.showAndWait();
+        try {
+            // Создаем FileChooser для выбора пути сохранения
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Сохранить историю входа как CSV");
+            fileChooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("CSV файлы", "*.csv"),
+                    new FileChooser.ExtensionFilter("Текстовые файлы", "*.txt"),
+                    new FileChooser.ExtensionFilter("Все файлы", "*.*")
+            );
+
+            // Устанавливаем имя файла по умолчанию
+            String defaultFileName = "история_входа_" +
+                    java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")) + ".csv";
+            fileChooser.setInitialFileName(defaultFileName);
+
+            // Показываем диалог сохранения
+            Stage stage = (Stage) historyTable.getScene().getWindow();
+            File file = fileChooser.showSaveDialog(stage);
+
+            if (file != null) {
+                // Формируем CSV содержимое
+                StringBuilder csvContent = new StringBuilder();
+                csvContent.append("Логин пользователя;IP-адрес;Время попытки входа;Статус\n");
+
+                for (LoginHistory history : historyTable.getItems()) {
+                    csvContent.append(String.format("%s;%s;%s;%s\n",
+                            history.getUsername() != null ? history.getUsername() : "",
+                            history.getIpAddress(),
+                            history.getFormattedTime(),
+                            history.getStatus()
+                    ));
+                }
+
+                // Сохраняем в файл
+                try (java.io.PrintWriter writer = new java.io.PrintWriter(
+                        new java.io.FileWriter(file.getAbsolutePath(), java.nio.charset.StandardCharsets.UTF_8))) {
+                    writer.write(csvContent.toString());
+                }
+
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Экспорт данных");
+                alert.setHeaderText("История входа экспортирована");
+                alert.setContentText("Файл сохранен: " + file.getAbsolutePath());
+                alert.showAndWait();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Ошибка");
+            alert.setHeaderText("Ошибка при экспорте");
+            alert.setContentText("Не удалось экспортировать данные: " + e.getMessage());
+            alert.showAndWait();
+        }
     }
 }

@@ -9,6 +9,8 @@ module com.example.trash {
     requires java.sql;
     requires kernel;
     requires layout;
+    requires spark.core;
+    requires io;
 
     // Открываем пакеты для JavaFX рефлексии
     opens com.example.trash to javafx.fxml;

@@ -86,8 +86,9 @@ public class ClientDAO {
 
     // Добавление нового клиента
     public static boolean addClient(Client client) {
-        String sql = "INSERT INTO clients (fio, birth_date, passport_series, passport_number, phone, email, company_id, type_client_id) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO clients (fio, birth_date, passport_series, passport_number, " +
+                "phone, email, company_id, type_client_id, login, password) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -113,11 +114,34 @@ public class ClientDAO {
 
             stmt.setInt(8, client.getTypeClientId());
 
+            // Автоматически генерируем логин и пароль
+            String login = generateLogin(client);
+            String password = generatePassword();
+
+            stmt.setString(9, login);
+            stmt.setString(10, password);
+
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
+    }
+
+    // Добавьте эти методы в ClientDAO
+    private static String generateLogin(Client client) {
+        // Используем email или телефон для логина
+        if (client.getEmail() != null && !client.getEmail().isEmpty()) {
+            return client.getEmail().split("@")[0]; // часть до @
+        } else if (client.getPhone() != null && !client.getPhone().isEmpty()) {
+            return "client_" + client.getPhone().replaceAll("[^0-9]", "");
+        }
+        return "client_" + System.currentTimeMillis() % 10000;
+    }
+
+    private static String generatePassword() {
+        // Простой пароль для клиентов (они не будут входить в систему)
+        return "client_pass";
     }
 
     // Получение клиента по ID
@@ -241,5 +265,43 @@ public class ClientDAO {
         }
 
         return -1;
+    }
+    // Получить всех клиентов
+    public static List<Client> getAllClients() {
+        List<Client> clients = new ArrayList<>();
+        String sql = "SELECT c.*, co.name as company_name FROM clients c " +
+                "LEFT JOIN compani co ON c.company_id = co.id " +
+                "WHERE c.archived = 0 ORDER BY c.fio";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Client client = new Client();
+                client.setId(rs.getInt("id"));
+                client.setFio(rs.getString("fio"));
+
+                Date birthDate = rs.getDate("birth_date");
+                if (birthDate != null) {
+                    client.setBirthDate(birthDate.toLocalDate());
+                }
+
+                client.setPassportSeries(rs.getString("passport_series"));
+                client.setPassportNumber(rs.getString("passport_number"));
+                client.setPhone(rs.getString("phone"));
+                client.setEmail(rs.getString("email"));
+                client.setCompanyId(rs.getInt("company_id"));
+                client.setTypeClientId(rs.getInt("type_client_id"));
+                client.setArchived(rs.getBoolean("archived"));
+                client.setCompanyName(rs.getString("company_name"));
+
+                clients.add(client);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return clients;
     }
 }

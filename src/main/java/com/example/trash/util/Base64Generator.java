@@ -1,13 +1,51 @@
 package com.example.trash.util;
 
 import com.example.trash.model.*;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+
+import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
 
 public class Base64Generator {
+
+    public static File generateOrderLinkWithSaveDialog(Order order, Client client, List<Service> services, Stage stage) {
+        try {
+            // Создаем FileChooser для выбора пути сохранения
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Сохранить Base64 ссылку");
+            fileChooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("Текстовые файлы", "*.txt"),
+                    new FileChooser.ExtensionFilter("Все файлы", "*.*")
+            );
+
+            // Устанавливаем имя файла по умолчанию
+            String defaultFileName = String.format("Ссылка_заказ_%d_%s.txt",
+                    order.getOrderNumber(),
+                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")));
+            fileChooser.setInitialFileName(defaultFileName);
+
+            // Показываем диалог сохранения
+            File file = fileChooser.showSaveDialog(stage);
+
+            if (file != null) {
+                // Генерируем Base64 данные
+                String base64Data = generateOrderLink(order, client, services);
+
+                // Сохраняем в выбранный файл
+                saveToFile(file, base64Data);
+                return file;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     public static String generateOrderLink(Order order, Client client, List<Service> services) {
         // Формируем JSON строку с информацией о заказе
@@ -68,11 +106,11 @@ public class Base64Generator {
         return link;
     }
 
-    public static void saveToTextFile(String data, String fileName) throws Exception {
-        try (FileOutputStream fos = new FileOutputStream(fileName)) {
+    public static void saveToFile(File file, String data) throws Exception {
+        try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(data.getBytes(StandardCharsets.UTF_8));
         }
-        System.out.println("Base64 ссылка сохранена в файл: " + fileName);
+        System.out.println("Base64 ссылка сохранена в файл: " + file.getAbsolutePath());
     }
 
     public static String decodeBase64(String base64Data) {

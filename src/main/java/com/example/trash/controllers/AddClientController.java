@@ -124,10 +124,18 @@ public class AddClientController {
 
     @FXML
     private void handleOk() {
+        System.out.println("=== DEBUG: Начало handleOk() ===");
+
         if (isInputValid()) {
+            System.out.println("Валидация пройдена");
+
             client = new Client();
             client.setFio(fioField.getText());
+            System.out.println("ФИО: " + fioField.getText());
+
             client.setBirthDate(birthDatePicker.getValue());
+            System.out.println("Дата рождения: " + birthDatePicker.getValue());
+
             client.setPassportSeries(passportSeriesField.getText());
             client.setPassportNumber(passportNumberField.getText());
             client.setPhone(phoneField.getText());
@@ -135,37 +143,56 @@ public class AddClientController {
 
             // Определение типа клиента
             if ("Юридическое лицо".equals(clientTypeComboBox.getValue())) {
+                System.out.println("Тип: Юридическое лицо");
                 client.setTypeClientId(2);
 
                 // Получение или создание компании
                 int companyId = -1;
                 if (!newCompanyField.getText().isEmpty()) {
+                    System.out.println("Создание новой компании: " + newCompanyField.getText());
                     // Создание новой компании
                     companyId = ClientDAO.createCompany(
                             newCompanyField.getText(),
                             companyAddressField.getText(),
                             companyINNField.getText()
                     );
+                    System.out.println("ID новой компании: " + companyId);
                 } else if (companyComboBox.getValue() != null) {
+                    System.out.println("Использование существующей компании: " + companyComboBox.getValue());
                     // Использование существующей компании
                     companyId = ClientDAO.getCompanyIdByName(companyComboBox.getValue());
+                    System.out.println("ID существующей компании: " + companyId);
                 }
 
                 if (companyId > 0) {
                     client.setCompanyId(companyId);
+                    System.out.println("ID компании установлен: " + companyId);
+                } else {
+                    System.out.println("ОШИБКА: Не удалось получить ID компании");
                 }
             } else {
+                System.out.println("Тип: Физическое лицо");
                 client.setTypeClientId(1);
             }
 
             // Сохранение клиента
-            if (ClientDAO.addClient(client)) {
+            System.out.println("Вызов ClientDAO.addClient()...");
+            boolean success = ClientDAO.addClient(client);
+            System.out.println("Результат сохранения: " + success);
+
+            if (success) {
                 okClicked = true;
+                System.out.println("Клиент успешно сохранен");
                 dialogStage.close();
             } else {
-                showAlert("Ошибка", "Не удалось сохранить клиента");
+                System.out.println("ОШИБКА: Не удалось сохранить клиента");
+                showAlert("Ошибка", "Не удалось сохранить клиента. Проверьте логи.");
             }
+        } else {
+            System.out.println("Валидация не пройдена");
         }
+
+        System.out.println("=== DEBUG: Конец handleOk() ===");
     }
 
     @FXML
