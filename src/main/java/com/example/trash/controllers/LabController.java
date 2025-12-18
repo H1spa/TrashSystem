@@ -2,6 +2,7 @@ package com.example.trash.controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
@@ -17,6 +18,7 @@ import com.example.trash.model.Service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -26,6 +28,8 @@ public class LabController extends BaseLabController {
 
     @FXML
     private Button logoutButton;
+    @FXML
+    private Button utilizersButton; // Добавьте эту строку
     @FXML
     private Button takeWasteButton;
     @FXML
@@ -40,6 +44,19 @@ public class LabController extends BaseLabController {
     public void initialize() {
         super.initialize();
         welcomeLabel.setText("Добро пожаловать, Лаборант!");
+    }
+    @FXML
+    private void handleUtilizers() {
+        try {
+            Stage currentStage = (Stage) logoutButton.getScene().getWindow();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml_file/utilizer_dashboard.fxml"));
+            Scene scene = new Scene(loader.load());
+            currentStage.setScene(scene);
+            currentStage.setTitle("Панель управления утилизаторами");
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Ошибка", "Не удалось открыть панель утилизаторов: " + e.getMessage());
+        }
     }
 
     @FXML

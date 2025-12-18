@@ -54,7 +54,10 @@
                 text="Экспорт в Excel"
                 onAction="#handleExport"
                 style="-fx-background-color: #498C51; -fx-text-fill: white;"/>
-
+        <Button fx:id="utilizersButton"
+                text="Утилизаторы"
+                onAction="#handleUtilizers"
+                style="-fx-background-color: #1E88E5; -fx-text-fill: white;"/>
         <!-- Новая кнопка для отчетов -->
         <Button fx:id="reportsButton"
                 text="Отчеты"

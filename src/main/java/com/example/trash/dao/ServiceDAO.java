@@ -223,4 +223,34 @@ public class ServiceDAO {
         }
         return null;
     }
+    public static List<Service> getServicesByUtilizer(String utilizerName) {
+        List<Service> services = new ArrayList<>();
+        String sql = "SELECT s.* FROM services s " +
+                "JOIN service_utilizers su ON s.code = su.service_code " +
+                "WHERE su.utilizer_name = ? AND s.archived = 0";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, utilizerName);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Service service = new Service();
+                service.setId(rs.getInt("id"));
+                service.setName(rs.getString("name"));
+                service.setCode(rs.getString("code"));
+                service.setCost(rs.getDouble("cost"));
+                service.setDurationDays(rs.getInt("duration_days"));
+                service.setDeviationAvg(rs.getDouble("deviation_avg"));
+                service.setArchived(rs.getBoolean("archived"));
+
+                services.add(service);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return services;
+    }
 }

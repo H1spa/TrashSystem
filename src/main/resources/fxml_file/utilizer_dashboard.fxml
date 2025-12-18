@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.text.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.trash.controllers.UtilizerDashboardController"
+      spacing="20"
+      style="-fx-background-color: #f5f7fa; -fx-font-family: 'Comic Sans MS'; -fx-padding: 20;">
+
+    <!-- Заголовок с логотипом и таймером -->
+    <HBox spacing="20" alignment="CENTER_LEFT"
+          style="-fx-background-color: linear-gradient(to right, #76e383, #4CAF50); -fx-padding: 20; -fx-background-radius: 10;">
+        <ImageView fitHeight="60" fitWidth="60" preserveRatio="true">
+            <Image url="@../import/photo/Логотип.png"/>
+        </ImageView>
+
+        <VBox spacing="5">
+            <Label text="Панель управления утилизаторами"
+                   style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            <Label fx:id="timestampLabel" text="Обновлено: --:--:--"
+                   style="-fx-text-fill: rgba(255,255,255,0.9); -fx-font-size: 14px;"/>
+        </VBox>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <!-- Таймер кварцевания -->
+        <VBox alignment="CENTER_RIGHT" spacing="2">
+            <Label text="Таймер кварцевания:" style="-fx-font-size: 12px; -fx-text-fill: rgba(255,255,255,0.9);"/>
+            <Label fx:id="timerLabel" text="60:00"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+        </VBox>
+
+        <VBox spacing="5" alignment="CENTER_RIGHT" style="-fx-padding: 0 0 0 20;">
+            <Label fx:id="userLabel" text="Пользователь: --"
+                   style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: white;"/>
+            <Label fx:id="roleLabel" text="Роль: --"
+                   style="-fx-text-fill: rgba(255,255,255,0.9); -fx-font-size: 14px;"/>
+        </VBox>
+    </HBox>
+
+    <!-- Статус эмулятора -->
+    <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10; -fx-background-color: white; -fx-background-radius: 8;">
+        <Label fx:id="emulatorStatusLabel" text="Статус эмулятора: Проверка..."
+               style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+    </HBox>
+
+    <!-- Статистика в карточках -->
+    <HBox spacing="20" alignment="CENTER" style="-fx-padding: 10;">
+        <VBox alignment="CENTER" spacing="5"
+              style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-min-width: 140; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+            <Label text="Всего" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+            <Label fx:id="totalUtilizersLabel" text="0"
+                   style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+        </VBox>
+
+        <VBox alignment="CENTER" spacing="5"
+              style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-min-width: 140; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+            <Label text="Свободно" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+            <Label fx:id="availableUtilizersLabel" text="0"
+                   style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #4CAF50;"/>
+        </VBox>
+
+        <VBox alignment="CENTER" spacing="5"
+              style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-min-width: 140; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+            <Label text="В работе" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+            <Label fx:id="busyUtilizersLabel" text="0"
+                   style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #FF9800;"/>
+        </VBox>
+
+        <VBox alignment="CENTER" spacing="5"
+              style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-min-width: 140; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+            <Label text="Заняты" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+            <Label fx:id="fullUtilizersLabel" text="0"
+                   style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #F44336;"/>
+        </VBox>
+    </HBox>
+
+    <!-- Сетка утилизаторов -->
+    <VBox spacing="10">
+        <HBox alignment="CENTER_LEFT" spacing="10">
+            <Label text="ДОСТУПНЫЕ УТИЛИЗАТОРЫ"
+                   style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Обновить" fx:id="refreshButton" onAction="#handleRefresh"
+                    style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-weight: bold;
+                           -fx-font-size: 12px; -fx-padding: 8 16; -fx-background-radius: 5;"/>
+        </HBox>
+        <GridPane fx:id="utilizersGrid" hgap="20" vgap="20"/>
+    </VBox>
+
+    <!-- Активные процессы -->
+    <VBox spacing="15" style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+        <HBox alignment="CENTER_LEFT">
+            <Label text="АКТИВНЫЕ ПРОЦЕССЫ"
+                   style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="activeProcessesCount" text="0 процессов"
+                   style="-fx-font-size: 14px; -fx-text-fill: #666; -fx-font-weight: bold;"/>
+        </HBox>
+
+        <TableView fx:id="activeProcessesTable" prefHeight="250"
+                   style="-fx-background-color: transparent;">
+            <columns>
+                <TableColumn fx:id="processIdColumn" text="ID процесса" prefWidth="120"
+                             style="-fx-font-family: 'Comic Sans MS';"/>
+                <TableColumn fx:id="serviceColumn" text="Услуга" prefWidth="200"
+                             style="-fx-font-family: 'Comic Sans MS';"/>
+                <TableColumn fx:id="utilizerColumn" text="Утилизатор" prefWidth="120"
+                             style="-fx-font-family: 'Comic Sans MS';"/>
+                <TableColumn fx:id="progressColumn" text="Прогресс" prefWidth="150"
+                             style="-fx-font-family: 'Comic Sans MS';"/>
+                <TableColumn fx:id="statusColumn" text="Статус" prefWidth="100"
+                             style="-fx-font-family: 'Comic Sans MS';"/>
+                <TableColumn fx:id="startTimeColumn" text="Начало" prefWidth="120"
+                             style="-fx-font-family: 'Comic Sans MS';"/>
+            </columns>
+        </TableView>
+    </VBox>
+
+    <!-- Кнопки действий -->
+    <HBox spacing="15" alignment="CENTER" style="-fx-padding: 10;">
+        <Button text="Обновить" fx:id="refreshButton2" onAction="#handleRefresh"
+                style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-weight: bold;
+                       -fx-font-size: 14px; -fx-padding: 10 20; -fx-background-radius: 5;"/>
+
+        <Button text="Освободить все" fx:id="releaseButton" onAction="#handleReleaseUtilizers"
+                style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-weight: bold;
+                       -fx-font-size: 14px; -fx-padding: 10 20; -fx-background-radius: 5;"/>
+
+        <Button text="История" fx:id="historyButton" onAction="#handleProcessHistory"
+                style="-fx-background-color: #673AB7; -fx-text-fill: white; -fx-font-weight: bold;
+                       -fx-font-size: 14px; -fx-padding: 10 20; -fx-background-radius: 5;"/>
+
+        <Button text="Отчеты" fx:id="reportsButton" onAction="#handleReports"
+                style="-fx-background-color: #009688; -fx-text-fill: white; -fx-font-weight: bold;
+                       -fx-font-size: 14px; -fx-padding: 10 20; -fx-background-radius: 5;"/>
+
+        <Button text="Выход" fx:id="logoutButton" onAction="#handleLogout"
+                style="-fx-background-color: #F44336; -fx-text-fill: white; -fx-font-weight: bold;
+                       -fx-font-size: 14px; -fx-padding: 10 20; -fx-background-radius: 5;"/>
+    </HBox>
+
+</VBox>

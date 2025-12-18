@@ -20,19 +20,32 @@ public abstract class BaseLabController extends BaseController {
     @Override
     public void initialize() {
         super.initialize();
-        startQuartzTimer();
+        if (timerLabel != null) {
+            startQuartzTimer();
+        } else {
+            System.err.println("WARNING: timerLabel is null in " + getClass().getName());
+        }
     }
 
     private void startQuartzTimer() {
         // Добавьте небольшую задержку перед запуском таймера
         Platform.runLater(() -> {
-            quartzTimer = new Timeline(new KeyFrame(Duration.seconds(1), e -> tick()));
-            quartzTimer.setCycleCount(Timeline.INDEFINITE);
-            quartzTimer.play();
+            if (timerLabel != null) {
+                quartzTimer = new Timeline(new KeyFrame(Duration.seconds(1), e -> tick()));
+                quartzTimer.setCycleCount(Timeline.INDEFINITE);
+                quartzTimer.play();
+            }
         });
     }
 
     private void tick() {
+        if (timerLabel == null) {
+            if (quartzTimer != null) {
+                quartzTimer.stop();
+            }
+            return;
+        }
+
         totalSeconds--;
 
         if (totalSeconds <= 0) {

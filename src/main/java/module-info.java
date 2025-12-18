@@ -11,6 +11,7 @@ module com.example.trash {
     requires layout;
     requires spark.core;
     requires io;
+    requires okhttp3;
 
     // Открываем пакеты для JavaFX рефлексии
     opens com.example.trash to javafx.fxml;

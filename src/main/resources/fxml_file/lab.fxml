@@ -33,11 +33,17 @@
            text="02:00"
            style="-fx-font-size: 18; -fx-text-fill: green;"/>
 
+    <!-- Добавьте кнопку "Утилизаторы" -->
     <HBox spacing="10">
         <Button fx:id="takeWasteButton"
                 text="Принять отходы"
                 onAction="#handleTakeWaste"
                 style="-fx-background-color: #498C51; -fx-text-fill: white;"/>
+
+        <Button fx:id="utilizersButton"
+                text="Утилизаторы"
+                onAction="#handleUtilizers"
+                style="-fx-background-color: #1E88E5; -fx-text-fill: white;"/>
 
         <Button fx:id="reportButton"
                 text="Сформировать отчёт"

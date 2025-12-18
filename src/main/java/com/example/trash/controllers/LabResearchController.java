@@ -1,6 +1,8 @@
 package com.example.trash.controllers;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -49,7 +51,19 @@ public class LabResearchController extends BaseLabController {
         // Загружаем эксперименты
         loadExperiments();
     }
-
+    @FXML
+    private void handleUtilizers() {
+        try {
+            Stage currentStage = (Stage) logoutButton.getScene().getWindow();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml_file/utilizer_dashboard.fxml"));
+            Scene scene = new Scene(loader.load());
+            currentStage.setScene(scene);
+            currentStage.setTitle("Панель управления утилизаторами");
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Ошибка", "Не удалось открыть панель утилизаторов: " + e.getMessage());
+        }
+    }
     private void loadExperiments() {
         try {
             List<Experiment> experiments = ExperimentDAO.getAllExperiments();
